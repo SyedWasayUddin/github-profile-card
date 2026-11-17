@@ -4,6 +4,8 @@ Type a GitHub username and see their profile, followers, repos and
 most-used languages, using live data from the GitHub REST API.
 """
 
+import re
+import sys
 from collections import Counter
 
 import requests
@@ -11,6 +13,7 @@ import requests
 
 API_URL = "https://api.github.com"
 TIMEOUT = 10  # seconds; never wait forever for the API
+USERNAME_RE = re.compile(r"^[A-Za-z0-9-]{1,39}$")  # letters, numbers, hyphens
 
 
 class GitHubError(Exception):
@@ -112,15 +115,26 @@ def format_card(user, repos):
 
 
 def main():
-    username = input("GitHub username: ").strip()
+    if len(sys.argv) > 1:
+        username = sys.argv[1]
+    else:
+        username = input("GitHub username: ")
+    username = username.strip()
+
+    if not USERNAME_RE.fullmatch(username):
+        print("Error: a GitHub username has only letters, numbers and hyphens.")
+        return 1
+
     try:
         user = get_user(username)
         repos = get_repos(username)
     except GitHubError as error:
         print(f"Error: {error}")
-        return
+        return 1
+
     print(format_card(user, repos))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
