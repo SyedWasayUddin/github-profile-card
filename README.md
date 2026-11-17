@@ -25,13 +25,14 @@ Built as the Module 1 take-home project of the AI Engineering bootcamp.
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/github-profile-card.git
+git clone https://github.com/SyedWasayUddin/github-profile-card.git
 cd github-profile-card
 
 python -m venv .venv
 source .venv/Scripts/activate      # Windows Git Bash
 # .venv\Scripts\activate           # Windows Command Prompt
 # source .venv/bin/activate        # macOS / Linux
+.\.venv\Scripts\Activate.ps1       # Windows Powershell
 
 pip install -r requirements.txt
 ```
@@ -53,25 +54,25 @@ GitHub username: octocat
 
 ## Sample output
 
-Example of the card format (your run shows the live data of the username you enter):
 
 ```text
 ==================================================
-  Demo User (@demo-user)
-  https://github.com/demo-user
+  Syed Wasay Uddin (@SyedWasayUddin)
+  https://github.com/SyedWasayUddin
 ==================================================
-  Bio          : Learning Python and AI
-  Location     : Karachi
-  Member since : 2021-03-14
-  Public repos : 5
-  Followers    : 12
-  Following    : 5
-  Stars earned : 8
+  Bio          : -
+  Location     : -
+  Member since : 2021-11-29
+  Public repos : 6
+  Followers    : 0
+  Following    : 0
+  Stars earned : 0
 --------------------------------------------------
   Most-used languages
-    Python       ############         3 repos (60%)
-    C            ####                 1 repo (20%)
-    HTML         ####                 1 repo (20%)
+    Python       #####                1 repo (25%)
+    PowerShell   #####                1 repo (25%)
+    TypeScript   #####                1 repo (25%)
+    HTML         #####                1 repo (25%)
 ==================================================
   Based on up to 100 recent public repos (forks excluded).
 ```
