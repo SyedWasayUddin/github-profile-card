@@ -13,22 +13,49 @@ API_URL = "https://api.github.com"
 TIMEOUT = 10  # seconds; never wait forever for the API
 
 
+class GitHubError(Exception):
+    """Raised with a friendly message when GitHub data cannot be fetched."""
+
+
+def github_get(path, params=None):
+    """GET one GitHub API path and return the parsed JSON."""
+    headers = {"Accept": "application/vnd.github+json"}
+    try:
+        resp = requests.get(
+            API_URL + path, params=params, headers=headers, timeout=TIMEOUT
+        )
+    except requests.RequestException as error:
+        raise GitHubError(
+            "Could not reach GitHub. Check your internet connection and try again."
+        ) from error
+
+    if resp.status_code == 404:
+        raise GitHubError("User not found. Check the spelling of the username.")
+    if resp.status_code in (403, 429):
+        raise GitHubError(
+            "GitHub rate limit reached (60 requests per hour without a token). "
+            "Wait a while and try again."
+        )
+    if not resp.ok:
+        raise GitHubError(
+            f"GitHub returned an unexpected error (status {resp.status_code})."
+        )
+    try:
+        return resp.json()
+    except ValueError as error:
+        raise GitHubError("GitHub sent a response we could not read.") from error
+
+
 def get_user(username):
     """Fetch the public profile of a GitHub user."""
-    resp = requests.get(f"{API_URL}/users/{username}", timeout=TIMEOUT)
-    resp.raise_for_status()
-    return resp.json()
+    return github_get(f"/users/{username}")
 
 
 def get_repos(username):
     """Fetch up to 100 of the user's public repos (most recently updated first)."""
-    resp = requests.get(
-        f"{API_URL}/users/{username}/repos",
-        params={"per_page": 100, "sort": "updated"},
-        timeout=TIMEOUT,
+    return github_get(
+        f"/users/{username}/repos", params={"per_page": 100, "sort": "updated"}
     )
-    resp.raise_for_status()
-    return resp.json()
 
 
 def own_repos(repos):
@@ -86,8 +113,12 @@ def format_card(user, repos):
 
 def main():
     username = input("GitHub username: ").strip()
-    user = get_user(username)
-    repos = get_repos(username)
+    try:
+        user = get_user(username)
+        repos = get_repos(username)
+    except GitHubError as error:
+        print(f"Error: {error}")
+        return
     print(format_card(user, repos))
 
 
