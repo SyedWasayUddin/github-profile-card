@@ -4,11 +4,13 @@ Type a GitHub username and see their profile, followers, repos and
 most-used languages, using live data from the GitHub REST API.
 """
 
+import os
 import re
 import sys
 from collections import Counter
 
 import requests
+from dotenv import load_dotenv
 
 
 API_URL = "https://api.github.com"
@@ -20,12 +22,20 @@ class GitHubError(Exception):
     """Raised with a friendly message when GitHub data cannot be fetched."""
 
 
+def build_headers():
+    """Standard headers, plus the optional token from the environment."""
+    headers = {"Accept": "application/vnd.github+json"}
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
 def github_get(path, params=None):
     """GET one GitHub API path and return the parsed JSON."""
-    headers = {"Accept": "application/vnd.github+json"}
     try:
         resp = requests.get(
-            API_URL + path, params=params, headers=headers, timeout=TIMEOUT
+            API_URL + path, params=params, headers=build_headers(), timeout=TIMEOUT
         )
     except requests.RequestException as error:
         raise GitHubError(
@@ -37,7 +47,7 @@ def github_get(path, params=None):
     if resp.status_code in (403, 429):
         raise GitHubError(
             "GitHub rate limit reached (60 requests per hour without a token). "
-            "Wait a while and try again."
+            "Wait a while, or add a GITHUB_TOKEN to your .env file."
         )
     if not resp.ok:
         raise GitHubError(
@@ -115,6 +125,7 @@ def format_card(user, repos):
 
 
 def main():
+    load_dotenv()  # read GITHUB_TOKEN from .env if the file exists
     if len(sys.argv) > 1:
         username = sys.argv[1]
     else:
