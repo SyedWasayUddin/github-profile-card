@@ -18,10 +18,23 @@ def get_user(username):
     return resp.json()
 
 
+def get_repos(username):
+    """Fetch up to 100 of the user's public repos (most recently updated first)."""
+    resp = requests.get(
+        f"{API_URL}/users/{username}/repos",
+        params={"per_page": 100, "sort": "updated"},
+        timeout=TIMEOUT,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 def main():
     username = input("GitHub username: ").strip()
     user = get_user(username)
+    repos = get_repos(username)
     print(f"{user['name'] or user['login']} has {user['followers']} followers")
+    print(f"Fetched {len(repos)} public repos")
 
 
 if __name__ == "__main__":
